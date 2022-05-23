@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
         # adding the required pct of empty labels
         for ix, i in enumerate(empty_labels):
-            f.write('EMPTY_'+i+'\n')
+            f.write(i+'\n')
             if ix == len_empty_labels:
                 break
 
