@@ -22,8 +22,7 @@ if __name__ == '__main__':
     empty_labels = []
     filled_labels = []
     for root, dirs, files in os.walk(data_loc):
-        print(root)
-        if root.split('\\')[-1].startswith(folder_filter):  # specify the name of the training folders
+        if root.split(os.sep)[-1].startswith(folder_filter):  # specify the name of the training folders
             if files:
                 for file in files:
                     if file.endswith('.txt'):
