@@ -41,15 +41,12 @@ if __name__ == '__main__':
     len_filled_labels = len(filled_labels)
     len_empty_labels = round((len_filled_labels * empty_label_pct) / (1 - empty_label_pct))
 
+    # adding the right amount of empty labels to the dataset
+    combined_labels = filled_labels + empty_labels[:len_empty_labels]
+    # making sure everything is randomly shuffled
+    random.shuffle(combined_labels)
+
     with open(output_file, 'w+') as f:
-        # adding all the filled labels
-        for ix, i in enumerate(filled_labels):
+        # adding all the filled labels and empty labels together
+        for ix, i in enumerate(combined_labels):
             f.write(i+'\n')
-
-        # adding the required pct of empty labels
-        for ix, i in enumerate(empty_labels):
-            f.write(i+'\n')
-            if ix == len_empty_labels:
-                break
-
-
