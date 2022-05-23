@@ -8,11 +8,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--data', type=str, default='/home/teamtv/eyedle-training/darknet/data/hockeyball_32tr_6te', help='path to dataset folder')
     parser.add_argument('-f', '--folder', type=str, default='task', help='folder name to filter between train and tests')
+    parser.add_argument('-o', '--output_file', type=str, default='/home/teamtv/eyedle-training/darknet/data/hockeyball_32tr_6te/yolov5_hockeyball_32tr_6te_train_filled_unbalanced.txt', help='txt file to output the data to')
     parser.add_argument('-p', '--pct_empty', type=float, default=0.05, help='percentage of empty files that is needed')
     args = parser.parse_args()
 
     data_loc = args.data
     empty_label_pct = args.pct_empty
+    output_file = args.output_file
     folder_filter = args.folder
 
 
@@ -39,9 +41,7 @@ if __name__ == '__main__':
     len_filled_labels = len(filled_labels)
     len_empty_labels = round((len_filled_labels * empty_label_pct) / (1 - empty_label_pct))
 
-    # with open('/home/teamtv/eyedle-training/darknet/data/hockeyball_32tr_6te/yolov5_hockeyball_32tr_6te_train_filled_unbalanced.txt', 'w+') as f:
-    with open(r'C:\Users\koen_\OneDrive\Bureaublad\klieder_folder\yolov5_hockeyball_32tr_6te_train_filled_unbalanced.txt', 'w+') as f:
-
+    with open(output_file, 'w+') as f:
         # adding all the filled labels
         for ix, i in enumerate(filled_labels):
             f.write(i+'\n')
