@@ -42,7 +42,7 @@ if __name__ == '__main__':
     len_empty_labels = round((len_filled_labels * empty_label_pct) / (1 - empty_label_pct))
 
     # adding the right amount of empty labels to the dataset
-    combined_labels = filled_labels + empty_labels[:len_empty_labels]
+    combined_labels = filled_labels + empty_labels[:len_empty_labels+1]
     # making sure everything is randomly shuffled
     random.shuffle(combined_labels)
 
