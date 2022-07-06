@@ -23,6 +23,7 @@ from datetime import datetime
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import torch
 import torch.distributed as dist
 import torch.nn as nn
@@ -31,6 +32,7 @@ from torch.cuda import amp
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.optim import SGD, Adam, AdamW, lr_scheduler
 from tqdm import tqdm
+from mlflow_logger import MLFlowLogger
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -516,6 +518,11 @@ def parse_opt(known=False):
     parser.add_argument('--bbox_interval', type=int, default=-1, help='W&B: Set bounding-box image logging interval')
     parser.add_argument('--artifact_alias', type=str, default='latest', help='W&B: Version of dataset artifact to use')
 
+    # MLFlow arguments
+    parser.add_argument('--version', type=str, required=True,
+                        help='MLFlow: Version of the model that is trained')
+    parser.add_argument('--log_artifacts', action='store_true', help='Log all model artifacts to MLFlow')
+
     opt = parser.parse_known_args()[0] if known else parser.parse_args()
     return opt
 
@@ -654,6 +661,24 @@ def main(opt, callbacks=Callbacks()):
         LOGGER.info(f'Hyperparameter evolution finished {opt.evolve} generations\n'
                     f"Results saved to {colorstr('bold', save_dir)}\n"
                     f'Usage example: $ python train.py --hyp {evolve_yaml}')
+
+    # Log training
+    logger = MLFlowLogger()
+    params = opt.__dict__
+    params.update(hyp)  # adding hyper parameters to already defined training run parameters
+
+    files = list(save_dir.glob('results*.csv'))
+    assert len(files), f'No results.csv files found in {save_dir.resolve()}, nothing to report to MLFlow.'
+    f = files[0]
+    data = pd.read_csv(f, skipinitialspace=True)
+    metrics = data.to_dict('records')[-1]
+
+    if opt.log_artifacts:
+        params['logged_artifacts'] = True
+        logger.log_run(experiment_name="Trained Models", run_name=opt.name, params=params, metrics=metrics, images=None,
+                artifacts=f'{save_dir.resolve()}')
+    else:
+        logger.log_run(experiment_name="Training Runs", run_name=opt.name, params=params, metrics=metrics, images=None)
 
 
 def run(**kwargs):
