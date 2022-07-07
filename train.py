@@ -668,6 +668,10 @@ def main(opt, callbacks=Callbacks()):
     f = files[0]
     data = pd.read_csv(f, skipinitialspace=True)
     metrics = data.to_dict('records')[-1]
+    for k, v in metrics.items():
+        if ':' in k:
+            new_key = k.replace(':', '-')
+            metrics[new_key] = data.pop(k)
 
     if opt.log_artifacts:
         params['logged_artifacts'] = True
