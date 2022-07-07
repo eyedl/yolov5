@@ -519,8 +519,6 @@ def parse_opt(known=False):
     parser.add_argument('--artifact_alias', type=str, default='latest', help='W&B: Version of dataset artifact to use')
 
     # MLFlow arguments
-    parser.add_argument('--version', type=str, required=True,
-                        help='MLFlow: Version of the model that is trained')
     parser.add_argument('--log_artifacts', action='store_true', help='Log all model artifacts to MLFlow')
 
     opt = parser.parse_known_args()[0] if known else parser.parse_args()
