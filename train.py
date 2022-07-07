@@ -672,7 +672,7 @@ def main(opt, callbacks=Callbacks()):
     if opt.log_artifacts:
         params['logged_artifacts'] = True
         logger.log_run(experiment_name="Trained Models", run_name=opt.name, params=params, metrics=metrics, images=None,
-                artifacts=f'{save_dir.resolve()}')
+                artifacts=f'{Path(opt.save_dir).resolve()}')
     else:
         logger.log_run(experiment_name="Training Runs", run_name=opt.name, params=params, metrics=metrics, images=None)
 
