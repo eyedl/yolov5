@@ -41,7 +41,7 @@ if str(ROOT) not in sys.path:
 import export
 import val
 from utils import notebook_init
-from utils.general import LOGGER, print_args
+from utils.general import LOGGER, check_yaml, file_size, print_args
 from utils.torch_utils import select_device
 
 
@@ -56,9 +56,8 @@ def run(
         pt_only=False,  # test PyTorch only
 ):
     y, t = [], time.time()
-    formats = export.export_formats()
     device = select_device(device)
-    for i, (name, f, suffix, gpu) in formats.iterrows():  # index, (name, file, suffix, gpu-capable)
+    for i, (name, f, suffix, gpu) in export.export_formats().iterrows():  # index, (name, file, suffix, gpu-capable)
         try:
             assert i != 9, 'Edge TPU not supported'
             assert i != 10, 'TF.js not supported'
@@ -76,10 +75,10 @@ def run(
             result = val.run(data, w, batch_size, imgsz, plots=False, device=device, task='benchmark', half=half)
             metrics = result[0]  # metrics (mp, mr, map50, map, *losses(box, obj, cls))
             speeds = result[2]  # times (preprocess, inference, postprocess)
-            y.append([name, round(metrics[3], 4), round(speeds[1], 2)])  # mAP, t_inference
+            y.append([name, round(file_size(w), 1), round(metrics[3], 4), round(speeds[1], 2)])  # MB, mAP, t_inference
         except Exception as e:
             LOGGER.warning(f'WARNING: Benchmark failure for {name}: {e}')
-            y.append([name, None, None])  # mAP, t_inference
+            y.append([name, None, None, None])  # mAP, t_inference
         if pt_only and i == 0:
             break  # break after PyTorch
 
@@ -87,7 +86,8 @@ def run(
     LOGGER.info('\n')
     parse_opt()
     notebook_init()  # print system info
-    py = pd.DataFrame(y, columns=['Format', 'mAP@0.5:0.95', 'Inference time (ms)'] if map else ['Format', 'Export', ''])
+    c = ['Format', 'Size (MB)', 'mAP@0.5:0.95', 'Inference time (ms)'] if map else ['Format', 'Export', '', '']
+    py = pd.DataFrame(y, columns=c)
     LOGGER.info(f'\nBenchmarks complete ({time.time() - t:.2f}s)')
     LOGGER.info(str(py if map else py.iloc[:, :2]))
     return py
@@ -104,9 +104,8 @@ def test(
         pt_only=False,  # test PyTorch only
 ):
     y, t = [], time.time()
-    formats = export.export_formats()
     device = select_device(device)
-    for i, (name, f, suffix, gpu) in formats.iterrows():  # index, (name, file, suffix, gpu-capable)
+    for i, (name, f, suffix, gpu) in export.export_formats().iterrows():  # index, (name, file, suffix, gpu-capable)
         try:
             w = weights if f == '-' else \
                 export.run(weights=weights, imgsz=[imgsz], include=[f], device=device, half=half)[-1]  # weights
@@ -136,6 +135,7 @@ def parse_opt():
     parser.add_argument('--test', action='store_true', help='test exports only')
     parser.add_argument('--pt-only', action='store_true', help='test PyTorch only')
     opt = parser.parse_args()
+    opt.data = check_yaml(opt.data)  # check YAML
     print_args(vars(opt))
     return opt
 
