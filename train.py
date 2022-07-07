@@ -659,7 +659,9 @@ def main(opt, callbacks=Callbacks()):
     # Log training using MLFlow
     logger = MLFlowLogger()  # init the mlflow logger TODO move to generic eyedle repo when properly set up
     params = opt.__dict__  # converting the parsed opt parameters that are used to set training parameters
-    params.update(opt.hyp)  # adding hyper parameters to already defined training run parameters
+    with open(opt.hyp, errors='ignore') as f:
+        hyp = yaml.safe_load(f)  # load hyps dict
+    params.update(hyp)  # adding hyper parameters to already defined training run parameters
 
     files = list(save_dir.glob('results*.csv'))
     assert len(files), f'No results.csv files found in {save_dir.resolve()}, nothing to report to MLFlow.'
