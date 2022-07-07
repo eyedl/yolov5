@@ -662,9 +662,9 @@ def main(opt, callbacks=Callbacks()):
                     f"Results saved to {colorstr('bold', save_dir)}\n"
                     f'Usage example: $ python train.py --hyp {evolve_yaml}')
 
-    # Log training
-    logger = MLFlowLogger()
-    params = opt.__dict__
+    # Log training using MLFlow
+    logger = MLFlowLogger()  # init the mlflow logger TODO move to generic eyedle repo when properly set up
+    params = opt.__dict__  # converting the parsed opt parameters that are used to set training parameters
     params.update(hyp)  # adding hyper parameters to already defined training run parameters
 
     files = list(save_dir.glob('results*.csv'))
