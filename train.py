@@ -663,8 +663,8 @@ def main(opt, callbacks=Callbacks()):
         hyp = yaml.safe_load(f)  # load hyps dict
     params.update(hyp)  # adding hyper parameters to already defined training run parameters
 
-    files = list(save_dir.glob('results*.csv'))
-    assert len(files), f'No results.csv files found in {save_dir.resolve()}, nothing to report to MLFlow.'
+    files = list(Path(opt.save_dir).glob('results*.csv'))
+    assert len(files), f'No results.csv files found in {Path(opt.save_dir).resolve()}, nothing to report to MLFlow.'
     f = files[0]
     data = pd.read_csv(f, skipinitialspace=True)
     metrics = data.to_dict('records')[-1]
